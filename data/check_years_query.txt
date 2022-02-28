@@ -1,0 +1,20 @@
+SELECT
+	now.name,
+	now.title,
+	now.rank as CurrentRank,
+	coalesce(past.rank, 'NA') as LastYearRank,
+	CASE
+		when past.rank is null then 'new'
+		when past.rank < now.rank then abs(now.rank - past.rank)
+		when past.rank > now.rank then -abs(now.rank - past.rank)
+		else '0'
+	end as Change
+from (
+	SELECT * from ranks where year = 2022
+) now
+left join (
+	select * from ranks where year = 2021
+) past
+	on now.bggid = past.BggId
+	and now.name = past.Name
+order by now.name, now.rank
